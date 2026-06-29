@@ -81,7 +81,7 @@ ats-insight/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── landing/          # Hero, Features, HowItWorks, Stats, Testimonials, Pricing, FAQ
+│   │   │   ├── landing/          # Hero, Features, HowItWorks, FAQ
 │   │   │   ├── upload/           # FileDropzone
 │   │   │   ├── dashboard/        # ScoreCard, ScoreCharts, KeywordChips, SuggestionsList
 │   │   │   └── common/           # Navbar, Footer, GlassCard, CircularProgress, Skeleton
@@ -90,6 +90,7 @@ ats-insight/
 │   │   └── utils/                 # api.js
 │   ├── package.json
 │   └── vite.config.js
+├── Dockerfile                     # multi-stage build: Node (frontend) → Python (backend + API)
 ├── render.yaml
 └── README.md
 ```
@@ -127,22 +128,21 @@ npm run dev                    # runs on http://localhost:5173
 
 ## Deployment on Render
 
-This repo includes a `render.yaml` that provisions two services:
-
-1. **ats-insight-backend** — Python web service (Flask + gunicorn), `rootDir: backend`
-2. **ats-insight-frontend** — Static site (Vite build), `rootDir: frontend`
+The app deploys as a **single Docker-based web service**: a multi-stage `Dockerfile` builds
+the React frontend, then copies the static build into the Flask backend image. Flask serves
+the REST API under `/api/*` and the built SPA for every other route — one service, one URL,
+no CORS hop between frontend and backend.
 
 Steps:
 1. Push this repository to GitHub.
-2. In Render, choose **New > Blueprint** and point it at the repository — Render will read
-   `render.yaml` and create both services automatically.
-3. After the backend service is live, set `VITE_API_BASE_URL` on the frontend service to the
-   backend's public URL (e.g. `https://ats-insight-backend.onrender.com`), then redeploy the
-   frontend so the build picks up the variable.
-4. (Optional) Set `CORS_ORIGINS` on the backend to the frontend's exact URL instead of `*`
-   once both URLs are known.
+2. In Render, choose **New > Blueprint** and point it at the repository — Render reads
+   `render.yaml` and creates a single `ats-insight` web service using the root `Dockerfile`.
+3. Click **Deploy Blueprint**. Render builds the Docker image (Node stage → Python stage) and
+   starts the service.
+4. Once live, open the service URL — both the landing page and the API are served from it.
 
-No code changes are required to deploy — only the environment variable above.
+No environment variables or code changes are required for a working deploy. `CORS_ORIGINS`
+is only needed if you ever split the frontend back out into its own separate origin.
 
 ## Future Enhancements
 

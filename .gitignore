@@ -6,6 +6,7 @@ backend/**/__pycache__/
 venv/
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/static_frontend/
 
 # Node
 frontend/node_modules/

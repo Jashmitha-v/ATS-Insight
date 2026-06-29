@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+// Empty string = same-origin relative requests (used in production, where
+// Flask serves both the API and the built frontend from one origin).
+// Override with VITE_API_BASE_URL for local dev against a separate backend.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
